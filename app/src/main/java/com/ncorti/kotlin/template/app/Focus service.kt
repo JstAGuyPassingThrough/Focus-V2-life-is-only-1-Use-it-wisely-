@@ -7,47 +7,35 @@ import android.widget.Toast
 
 class FocusService : AccessibilityService() {
 
-    private val blockList = listOf("porn", "sex", "nsfw", "adult", "milf", "xxx", "xhamster", "xham", "hentai")
-    
-    // Your safe topics override the block
-    private val allowList = listOf("matrices", "thermodynamics", "quantum numbers", "plus one physics", "class 11")
-
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // Grab the invisible skeleton of the current screen
-        val rootNode = rootInActiveWindow ?: return
+        if (event == null) return
+
+        val packageName = event.packageName?.toString() ?: ""
         
-        // Extract all the text from every corner of the screen
-        val screenText = getAllText(rootNode).lowercase()
-
-        for (badWord in blockList) {
-            // We use word boundaries to check if the blocked word is isolated
-            if (screenText.contains(badWord)) {
+        // Step 1: Are we inside Instagram or YouTube?
+        if (packageName.contains("instagram") || packageName.contains("youtube")) {
+            
+            // Step 2: Did the user just try to swipe/scroll to the next video?
+            if (event.eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
                 
-                var isStudyTopic = false
-                for (goodWord in allowList) {
-                    if (screenText.contains(goodWord)) {
-                        isStudyTopic = true
-                        break
-                    }
-                }
+                // Step 3: Check if we are in the "Reels" or "Shorts" section
+                val rootNode = rootInActiveWindow ?: return
+                val screenText = getAllText(rootNode).lowercase()
 
-                if (!isStudyTopic) {
-                    // Kick back to home screen
+                if (screenText.contains("reels") || screenText.contains("shorts")) {
+                    // TRAP TRIGGERED! Kick them to the home screen!
                     performGlobalAction(GLOBAL_ACTION_HOME)
-                    Toast.makeText(applicationContext, "Focus on Goals: Content Blocked!", Toast.LENGTH_SHORT).show()
-                    return 
+                    Toast.makeText(applicationContext, "One and Done! No doomscrolling allowed!", Toast.LENGTH_LONG).show()
                 }
             }
         }
     }
 
-    // A custom scanner that digs through every element on the screen to pull out the text
+    // Our background text scanner
     private fun getAllText(node: AccessibilityNodeInfo?): String {
         if (node == null) return ""
-        
         var text = node.text?.toString() ?: ""
         text += " " + (node.contentDescription?.toString() ?: "")
-        
         for (i in 0 until node.childCount) {
             text += " " + getAllText(node.getChild(i))
         }
