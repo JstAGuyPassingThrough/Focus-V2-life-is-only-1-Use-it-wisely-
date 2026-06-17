@@ -17,7 +17,7 @@ android {
         minSdk = libs.versions.min.sdk.version.get().toInt()
         namespace = APP_ID
 
-        applicationId = APP_ID
+        applicationId = "com.ncorti.kotlin.template.app.reels"
         versionCode = APP_VERSION_CODE.toInt()
         versionName = APP_VERSION_NAME
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
