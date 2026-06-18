@@ -1,16 +1,6 @@
-package com.ncorti.kotlin.template.app
-
-import android.accessibilityservice.AccessibilityService
-import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Toast
-
-class FocusService : AccessibilityService() {
-
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
         
-        // We added '?: return' here so Kotlin knows it is safe to use!
         val packageName = event.packageName?.toString() ?: return
 
         // Step 1: Are we inside Instagram or YouTube?
@@ -19,29 +9,25 @@ class FocusService : AccessibilityService() {
             // Step 2: Did the user just try to swipe/scroll?
             if (event.eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
                 
-                // Step 3: Check if we are in the "Reels" or "Shorts" section
                 val rootNode = rootInActiveWindow ?: return
                 val screenText = getAllText(rootNode).lowercase()
                 
-                if (screenText.contains("reels") || screenText.contains("shorts")) {
+                // Step 3: The Smart Check
+                // Instead of the tab names, we look for UI buttons that ONLY exist inside the Reels/Shorts players
+                val isPlayingShortFormVideo = screenText.contains("like this short") || 
+                                              screenText.contains("remix") || 
+                                              screenText.contains("use audio") ||
+                                              screenText.contains("original audio") ||
+                                              screenText.contains("audio page")
+                
+                if (isPlayingShortFormVideo) {
                     // TRAP TRIGGERED! Kick them to the home screen
                     performGlobalAction(GLOBAL_ACTION_HOME)
-                    Toast.makeText(applicationContext, "One and Done! No doomscrolling allowed!", Toast.LENGTH_SHORT).show()
+                    
+                    // A custom reminder of what you should be doing instead!
+                    Toast.makeText(applicationContext, "One and Done! +1 Physics and Math won't study themselves!", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
-
-    // Our background text scanner
-    private fun getAllText(node: AccessibilityNodeInfo?): String {
-        if (node == null) return ""
-        var text = node.text?.toString() ?: ""
-        text += " " + (node.contentDescription?.toString() ?: "")
-        for (i in 0 until node.childCount) {
-            text += " " + getAllText(node.getChild(i))
-        }
-        return text
-    }
-
-    override fun onInterrupt() {}
-}
+    
