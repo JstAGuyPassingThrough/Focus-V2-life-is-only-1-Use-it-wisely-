@@ -4,4 +4,4 @@
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags="flagDefault|flagRetrieveInteractiveWindows"
     android:canRetrieveWindowContent="true"
-    android:description="Blocks doomscrolling on Reels and Shorts" />
+    android:description="@string/app_name" />
