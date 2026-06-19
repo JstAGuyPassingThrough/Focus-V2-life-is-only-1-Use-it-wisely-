@@ -12,24 +12,31 @@ class FocusService : AccessibilityService() {
 
         val packageName = event.packageName?.toString() ?: return
 
-        if (packageName.contains("instagram") || packageName.contains("youtube")) {
+        val isAppTarget = packageName.contains("instagram") || packageName.contains("youtube")
+        
+        if (isAppTarget) {
             if (event.eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
                 
                 val rootNode = rootInActiveWindow ?: return
                 val screenText = getAllText(rootNode).lowercase()
                 
-                // YOUTUBE SHORTS LOGIC (Still works perfectly!)
-                if (packageName.contains("youtube") && screenText.contains("like this short")) {
+                // YOUTUBE SHORTS TARGET
+                val isYouTubeShorts = packageName.contains("youtube") && 
+                    screenText.contains("like this short")
+                
+                // INSTAGRAM REELS TARGET (Using our X-Ray discovery!)
+                val isInstaReels = packageName.contains("instagram") && 
+                    screenText.contains("reels tray container")
+                
+                if (isYouTubeShorts || isInstaReels) {
+                    // TRAP TRIGGERED!
                     performGlobalAction(GLOBAL_ACTION_HOME)
-                    Toast.makeText(applicationContext, "This time won't come back again!", Toast.LENGTH_SHORT).show()
-                    return
-                }
-
-                // INSTAGRAM X-RAY VISION (Debug Mode)
-                if (packageName.contains("instagram")) {
-                    // This prints the first 150 characters the app "sees" to your screen
-                    val xRayText = screenText.take(150) 
-                    Toast.makeText(applicationContext, "X-RAY: $xRayText", Toast.LENGTH_LONG).show()
+                    
+                    Toast.makeText(
+                        applicationContext, 
+                        "This time won't come back again!", 
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
