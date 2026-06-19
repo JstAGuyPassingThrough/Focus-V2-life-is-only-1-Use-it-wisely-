@@ -19,26 +19,20 @@ class FocusService : AccessibilityService() {
             // Step 2: Did the user just try to swipe/scroll?
             if (event.eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
                 
-                // --- THE TRIPWIRE ---
-                // If you see this pop up, the M31 successfully detects your swipe!
-                Toast.makeText(applicationContext, "Bouncer heard a swipe!", Toast.LENGTH_SHORT).show()
-                
                 val rootNode = rootInActiveWindow ?: return
                 val screenText = getAllText(rootNode).lowercase()
                 
                 // Step 3: The Smart Check
+                // We removed the 'audio' triggers so normal photo posts don't kick you!
                 val isShorts = screenText.contains("like this short") || 
-                    screenText.contains("remix") || 
-                    screenText.contains("use audio") ||
-                    screenText.contains("original audio") ||
-                    screenText.contains("audio page")
+                    screenText.contains("remix")
                 
                 if (isShorts) {
                     performGlobalAction(GLOBAL_ACTION_HOME)
                     
                     Toast.makeText(
                         applicationContext, 
-                        "One and Done! +1 Physics and Math won't study themselves!", 
+                        "This time won't come back again!", 
                         Toast.LENGTH_SHORT
                     ).show()
                 }
