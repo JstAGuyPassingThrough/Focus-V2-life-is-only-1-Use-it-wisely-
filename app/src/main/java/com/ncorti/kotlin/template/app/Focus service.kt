@@ -1,4 +1,4 @@
-    package com.ncorti.kotlin.template.app
+package com.ncorti.kotlin.template.app
 
 import android.accessibilityservice.AccessibilityService
 import android.view.accessibility.AccessibilityEvent
@@ -19,10 +19,14 @@ class FocusService : AccessibilityService() {
             // Step 2: Did the user just try to swipe/scroll?
             if (event.eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
                 
+                // --- THE TRIPWIRE ---
+                // If you see this pop up, the M31 successfully detects your swipe!
+                Toast.makeText(applicationContext, "Bouncer heard a swipe!", Toast.LENGTH_SHORT).show()
+                
                 val rootNode = rootInActiveWindow ?: return
                 val screenText = getAllText(rootNode).lowercase()
                 
-                // Step 3: The Smart Check (Broken into short lines for the strict compiler!)
+                // Step 3: The Smart Check
                 val isShorts = screenText.contains("like this short") || 
                     screenText.contains("remix") || 
                     screenText.contains("use audio") ||
@@ -30,10 +34,8 @@ class FocusService : AccessibilityService() {
                     screenText.contains("audio page")
                 
                 if (isShorts) {
-                    // TRAP TRIGGERED! Kick them to the home screen
                     performGlobalAction(GLOBAL_ACTION_HOME)
                     
-                    // Stacked neatly so the line isn't too long!
                     Toast.makeText(
                         applicationContext, 
                         "One and Done! +1 Physics and Math won't study themselves!", 
@@ -44,7 +46,6 @@ class FocusService : AccessibilityService() {
         }
     }
 
-    // Our background text scanner
     private fun getAllText(node: AccessibilityNodeInfo?): String {
         if (node == null) return ""
         var text = node.text?.toString() ?: ""
